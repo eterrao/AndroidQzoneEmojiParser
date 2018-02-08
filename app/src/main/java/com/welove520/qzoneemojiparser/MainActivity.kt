@@ -89,7 +89,6 @@ class MainActivity : AppCompatActivity() {
             fun bindEmoji(emoji: QQEmoji) {
                 Glide.with(itemView.iv_emoji.context)
                         .load(emoji.url)
-                        .listener()
                         .into(itemView.iv_emoji!!.iv_emoji)
                 itemView.tv_emoji_url.text = emoji.id
             }
