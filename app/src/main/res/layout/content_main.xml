@@ -14,17 +14,22 @@
         android:layout_width="30dp"
         android:layout_height="30dp" />
 
-    <TextView
-        android:id="@+id/tv_preview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/iv_emoji_preview"
-        android:text="Hello World!" />
+    <ScrollView
+        android:id="@+id/sv_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hello World!" />
+    </ScrollView>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_emoji"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/tv_preview" />
+        android:layout_below="@+id/sv_preview" />
 
 </RelativeLayout>
