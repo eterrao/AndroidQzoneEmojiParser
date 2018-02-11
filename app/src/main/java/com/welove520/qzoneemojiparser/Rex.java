@@ -1,9 +1,12 @@
 package com.welove520.qzoneemojiparser;
 
 import android.graphics.Bitmap;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
+import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -11,6 +14,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.welove520.qzoneemojiparser.util.ImageUtil;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +24,42 @@ import java.util.regex.Pattern;
 
 public class Rex {
 
+    public static void downloadAllEmojis() {
+        int index = 100;
+        while (index++ < 3000) {
+            String imgType = (index < 200 ? "@2x.png" : "@2x.gif");
+            String emojiImg = "http://qzonestyle.gtimg.cn/qzone/em/e" + index + imgType;
+            final String emojiName = "e" + index + ".png";
+            SimpleTarget<Bitmap> target = new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(final Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (resource != null && !resource.isRecycled()) {
+                                Bitmap dstBmp = Bitmap.createScaledBitmap(resource, 25, 25, true);
+                                boolean result = ImageUtil.save(emojiName, dstBmp, MyApplication.Companion.getContext());
+                                Log.e("save_tag", "bitmap saved : " + emojiName + " result : " + result);
+                            }
+                        }
+                    }).start();
+                }
+
+                @Override
+                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                    super.onLoadFailed(e, errorDrawable);
+
+                }
+            };
+            Glide.with(MyApplication.Companion.getContext())
+                    .load(emojiImg)
+                    .asBitmap()
+                    .format(DecodeFormat.PREFER_ARGB_8888)
+                    .fitCenter()
+                    .into(target);
+        }
+    }
+
     /**
      * eg:
      * content:[em]e102[/em]
@@ -27,12 +67,9 @@ public class Rex {
     public static String transferUbbToImg(String content, int number) {
         String newContent = content;
         String emojiImg;
-
         String reg = "\\[em\\]e(\\d{3,10})\\[\\/em\\]";
         Pattern pattern = Pattern.compile(reg);
         Matcher result = pattern.matcher(content);
-
-
         //因为重构那边不能提供静态的gif，所以空间表情用png（数字小于200的就是空间表情），emoji用gif
         while (result.find()) {
             String imgType;
@@ -41,50 +78,61 @@ public class Rex {
 //            emojiImg = "<img class='i-emoji-m' src='http://qzonestyle.gtimg.cn/qzone/em/e" + result.group(1) + imgType + "' alt='表情' >";
             emojiImg = "http://qzonestyle.gtimg.cn/qzone/em/e" + result.group(1) + imgType;
             final String emojiName = "e" + number + ".png";
-            final SimpleTarget target = new SimpleTarget<Bitmap>() {
+            final SimpleTarget<Bitmap> target = new SimpleTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(final Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-//                SpannableStringBuilder builder = new SpannableStringBuilder();
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    builder.append("", new ImageSpan(MyApplication.Companion.getContext(), resource), 0);
-//                }
-
-                    final Bitmap emojiBmp = Bitmap.createBitmap(resource).copy(Bitmap.Config.ARGB_8888, true);
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            if (emojiBmp != null && !emojiBmp.isRecycled()) {
-                                ImageUtil.save(emojiName, emojiBmp, MyApplication.Companion.getContext());
+                            if (resource != null && !resource.isRecycled()) {
+                                Log.e("save_tag", "bitmap saved : " + emojiName);
+                                ImageUtil.save(emojiName, resource, MyApplication.Companion.getContext());
                             }
                         }
                     }).start();
                 }
             };
             final String finalEmojiImg = emojiImg;
-            new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(Message msg) {
-                    Glide.with(MyApplication.Companion.getContext())
-                            .load(finalEmojiImg)
-                            .asBitmap()
-                            .format(DecodeFormat.PREFER_ARGB_8888)
-                            .override(100, 100)
-                            .fitCenter()
-                            .into(target);
-                }
-            }.sendEmptyMessage(0);
-
-//            SpannableStringBuilder builder = new SpannableStringBuilder();
-//            File imgFile = ImageUtil.getImageByName(MyApplication.Companion.getContext(), emojiName);
-//            if (imgFile != null && imgFile.exists()) {
-//                ImageSpan span = new ImageSpan(MyApplication.Companion.getContext(), BitmapFactory.decodeFile(imgFile.getPath()));
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    builder.append("", span, 0);
-//                }
-//            }
+            Glide.with(MyApplication.Companion.getContext())
+                    .load(finalEmojiImg)
+                    .asBitmap()
+                    .format(DecodeFormat.PREFER_ARGB_8888)
+                    .override(100, 100)
+                    .fitCenter()
+                    .into(target);
             newContent = newContent.replace(result.group(0), emojiImg);
         }
 
         return newContent;
+    }
+
+    /**
+     * eg:
+     * content:[em]e102[/em]
+     */
+    public static CharSequence transferUbb(String content) {
+        String newContent = content;
+        String emojiImg;
+        String reg = "\\[em\\]e(\\d{3,10})\\[\\/em\\]";
+        Pattern pattern = Pattern.compile(reg);
+        Matcher result = pattern.matcher(content);
+        //因为重构那边不能提供静态的gif，所以空间表情用png（数字小于200的就是空间表情），emoji用gif
+        SpannableStringBuilder builderTotal = new SpannableStringBuilder();
+        while (result.find()) {
+//            emojiImg = "<img class='i-emoji-m' src='http://qzonestyle.gtimg.cn/qzone/em/e" + result.group(1) + imgType + "' alt='表情' >";
+            SpannableStringBuilder builder = new SpannableStringBuilder();
+            emojiImg = "e" + result.group(1) + ".png";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                File imgFile = ImageUtil.getImageByName(MyApplication.Companion.getContext(), emojiImg);
+                if (imgFile != null && imgFile.exists()) {
+                    Bitmap bmp = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(imgFile.getPath()), 70, 70, true);
+
+                    builder.append(emojiImg, new ImageSpan(MyApplication.Companion.getContext(), bmp), 0);
+                }
+            }
+            builderTotal.append(builder);
+            newContent = newContent.replace(result.group(0), builder);
+        }
+        return builderTotal;
     }
 }

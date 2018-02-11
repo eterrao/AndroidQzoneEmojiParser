@@ -8,6 +8,17 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.welove520.qzoneemojiparser.QQEmojiTextView
+            android:id="@+id/qq_emoji_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="12345"
+            android:textSize="14dp" />
+    </ScrollView>
 
     <ImageView
         android:id="@+id/iv_emoji_preview"
@@ -17,7 +28,8 @@
     <ScrollView
         android:id="@+id/sv_preview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tv_preview"
@@ -27,9 +39,16 @@
     </ScrollView>
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_emoji"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/sv_preview" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sv_preview"
+        android:visibility="gone" />
 
 </RelativeLayout>
