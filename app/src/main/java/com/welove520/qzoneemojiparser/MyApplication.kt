@@ -3,6 +3,8 @@ package com.welove520.qzoneemojiparser
 import android.app.Application
 import android.content.Context
 import com.facebook.drawee.backends.pipeline.Fresco
+import com.welove520.qzoneemojiparser.emoji.EmojiManager
+import com.welove520.qzoneemojiparser.emoji.IosEmojiProvider
 
 /**
  * Created by Raomengyang on 18-2-9.
@@ -19,5 +21,7 @@ open class MyApplication : Application() {
         super.onCreate()
         context = applicationContext
         Fresco.initialize(this)
+        EmojiManager.install(IosEmojiProvider())
+
     }
 }

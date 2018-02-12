@@ -2,8 +2,10 @@ package com.welove520.qzoneemojiparser;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 import android.util.Log;
@@ -15,6 +17,8 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.welove520.qzoneemojiparser.util.ImageUtil;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +30,7 @@ public class Rex {
 
     public static void downloadAllEmojis() {
         int index = 100;
-        while (index++ < 3000) {
+        while (index++ < 400000) {
             String imgType = (index < 200 ? "@2x.png" : "@2x.gif");
             String emojiImg = "http://qzonestyle.gtimg.cn/qzone/em/e" + index + imgType;
             final String emojiName = "e" + index + ".png";
@@ -37,8 +41,8 @@ public class Rex {
                         @Override
                         public void run() {
                             if (resource != null && !resource.isRecycled()) {
-                                Bitmap dstBmp = Bitmap.createScaledBitmap(resource, 25, 25, true);
-                                boolean result = ImageUtil.save(emojiName, dstBmp, MyApplication.Companion.getContext());
+//                                Bitmap dstBmp = Bitmap.createScaledBitmap(resource, 25, 25, true);
+                                boolean result = ImageUtil.save(emojiName, resource, MyApplication.Companion.getContext());
                                 Log.e("save_tag", "bitmap saved : " + emojiName + " result : " + result);
                             }
                         }
@@ -97,7 +101,6 @@ public class Rex {
                     .load(finalEmojiImg)
                     .asBitmap()
                     .format(DecodeFormat.PREFER_ARGB_8888)
-                    .override(100, 100)
                     .fitCenter()
                     .into(target);
             newContent = newContent.replace(result.group(0), emojiImg);
@@ -122,12 +125,15 @@ public class Rex {
 //            emojiImg = "<img class='i-emoji-m' src='http://qzonestyle.gtimg.cn/qzone/em/e" + result.group(1) + imgType + "' alt='表情' >";
             SpannableStringBuilder builder = new SpannableStringBuilder();
             emojiImg = "e" + result.group(1) + ".png";
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                File imgFile = ImageUtil.getImageByName(MyApplication.Companion.getContext(), emojiImg);
-                if (imgFile != null && imgFile.exists()) {
-                    Bitmap bmp = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(imgFile.getPath()), 70, 70, true);
-
+            File imgFile = ImageUtil.getImageByName(MyApplication.Companion.getContext(), emojiImg);
+            if (imgFile != null && imgFile.exists()) {
+                Bitmap bmp = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(imgFile.getPath()), 70, 70, true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     builder.append(emojiImg, new ImageSpan(MyApplication.Companion.getContext(), bmp), 0);
+                } else {
+                    builder.append("a")
+                            .setSpan(new ImageSpan(MyApplication.Companion.getContext(), bmp),
+                            builder.length() - 1, builder.length(), 0);
                 }
             }
             builderTotal.append(builder);
@@ -135,4 +141,36 @@ public class Rex {
         }
         return builderTotal;
     }
+
+    private static Html.ImageGetter assetsImageGetter = new Html.ImageGetter() {
+        public Drawable getDrawable(String source) {
+            Drawable drawable = null;
+            InputStream inputStream = null;
+            try {
+                inputStream = MyApplication.Companion.getContext().getAssets().open(source);
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                drawable = new BitmapDrawable(bitmap);
+                drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                bitmap = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return drawable;
+        }
+    };
+
+    public static CharSequence getRichContent(String content) {
+        String html = "(:<img src='e101@2x.png'/>AND<img src='e101@2x.png'/>:)";
+        CharSequence richText = Html.fromHtml(html, assetsImageGetter, null);
+        return richText;
+    }
+
 }

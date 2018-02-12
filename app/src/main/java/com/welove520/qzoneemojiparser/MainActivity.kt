@@ -2,6 +2,7 @@ package com.welove520.qzoneemojiparser
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -48,19 +49,28 @@ class MainActivity : AppCompatActivity() {
 //        initListRecyclerView()
 //        initRecyclerView()
 //        parseQQEmoji()
-//        downloadQQEmojis()
-        initQQEmojiTextView()
+        downloadQQEmojis()
+//        initQQEmojiTextView()
     }
 
     private fun initQQEmojiTextView() {
         var index = 100
         var result = ""
-        while (index++ < 3000) {
+        while (index++ < 2000) {
             result += "[em]e$index[/em]"
             Log.e(LOG_TAG, "parse result : " + result)
         }
-        qq_emoji_tv.setText(result, TextView.BufferType.NORMAL)
+//        val imgFile = ImageUtil.getImageByName(MyApplication.context, "e" + 102 + ".png")
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//            qq_emoji_tv.text = "abc"
+//            qq_emoji_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(BitmapDrawable(resources, BitmapFactory.decodeFile(imgFile.path)), null, null, null)
+//        }
+//        = Rex.getRichContent(result);
+        qq_emoji_tv.setText(result, TextView.BufferType.SPANNABLE)
+//        qzone_emoji_tv.setText(result, TextView.BufferType.NORMAL)
     }
+
 
     private fun downloadQQEmojis() {
         Rex.downloadAllEmojis()
