@@ -2,14 +2,13 @@ package com.welove520.qzoneemojiparser
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
 import android.util.Log
@@ -17,11 +16,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DecodeFormat
-import com.bumptech.glide.request.animation.GlideAnimation
-import com.bumptech.glide.request.target.SimpleTarget
 import com.welove520.qzoneemojiparser.util.ImageUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -49,17 +43,29 @@ class MainActivity : AppCompatActivity() {
 //        initListRecyclerView()
 //        initRecyclerView()
 //        parseQQEmoji()
-        downloadQQEmojis()
-//        initQQEmojiTextView()
+//        downloadQQEmojis()
+        initQQEmojiTextView()
+
+//        initHtmlTextView()
+    }
+
+    private fun initHtmlTextView() {
+        var imageUrl = "This will display an image to the right <img src='http://qzonestyle.gtimg.cn/qzone/em/e3000@2x.gif' />";
+
+//        tv_html.text = Html.fromHtml(imageUrl, GlideImageGetter(this, tv_html), null)
     }
 
     private fun initQQEmojiTextView() {
         var index = 100
-        var result = ""
-        while (index++ < 2000) {
-            result += "[em]e$index[/em]"
-            Log.e(LOG_TAG, "parse result : " + result)
-        }
+        var result = StringBuilder()
+        Thread(Runnable {
+
+            val currentTimeMS = System.currentTimeMillis()
+            Log.e("TAG", " start create content =========> $currentTimeMS ms")
+            while (index++ < 4000) {
+                result.append("[em]e$index[/em]")
+                Log.e(LOG_TAG, "parse result : " + result)
+            }
 //        val imgFile = ImageUtil.getImageByName(MyApplication.context, "e" + 102 + ".png")
 //
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -67,7 +73,14 @@ class MainActivity : AppCompatActivity() {
 //            qq_emoji_tv.setCompoundDrawablesRelativeWithIntrinsicBounds(BitmapDrawable(resources, BitmapFactory.decodeFile(imgFile.path)), null, null, null)
 //        }
 //        = Rex.getRichContent(result);
-        qq_emoji_tv.setText(result, TextView.BufferType.SPANNABLE)
+            Log.e("TAG", " finished create content ======> " + (System.currentTimeMillis() - currentTimeMS) + " ms")
+
+            this.runOnUiThread {
+                pb_loading.visibility = View.VISIBLE
+                qq_emoji_tv.text = result
+            }
+        }).start()
+
 //        qzone_emoji_tv.setText(result, TextView.BufferType.NORMAL)
     }
 
@@ -219,9 +232,9 @@ class MainActivity : AppCompatActivity() {
         Observable.just(3000)
                 .map { t ->
                     while (i < t!!) {
-                        val result = Rex.transferUbbToImg("[em]e$i[/em]", i)
+                        val result = Rex.transferUbbToImg("[em]e$i[/em]")
                         Log.e(LOG_TAG, "parse result : " + result)
-                        var emoji: QQEmoji = QQEmoji()
+                        var emoji = QQEmoji()
                         emoji.url = result
 //                        emoji.id = "[em]e$i[/em]"
                         emoji.id = "e$i.png"
@@ -278,36 +291,36 @@ class MainActivity : AppCompatActivity() {
         class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
 
             fun bindEmoji(emoji: QQEmoji) {
-                itemView.tv_emoji.text = emoji.id
-                var target = object : SimpleTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
-                        val builder = SpannableStringBuilder()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            builder.append(" ", ImageSpan(itemView.context, resource), 0)
-                        }
-                        itemView.tv_emoji.text = builder
-                    }
-
-                    override fun onLoadFailed(e: Exception?, errorDrawable: Drawable?) {
-                        super.onLoadFailed(e, errorDrawable)
-                        val builder = SpannableStringBuilder()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            builder.append(" ", ImageSpan(itemView.context,
-                                    BitmapFactory.decodeResource(itemView.resources, R.mipmap.ic_launcher_round)), 0)
-                        }
-                        itemView.tv_emoji.text = builder
-                    }
-                }
-                Glide.with(itemView.context)
-                        .load(emoji.url)
-                        .asBitmap()
-                        .skipMemoryCache(true)
-                        .placeholder(R.mipmap.ic_launcher_round)
-                        .error(R.mipmap.ic_launcher_round)
-                        .format(DecodeFormat.PREFER_ARGB_8888)
-                        .override(50, 50)
-                        .fitCenter()
-                        .into(target)
+//                itemView.tv_emoji.text = emoji.id
+//                var target = object : SimpleTarget<Bitmap>() {
+//                    override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
+//                        val builder = SpannableStringBuilder()
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                            builder.append(" ", ImageSpan(itemView.context, resource), 0)
+//                        }
+//                        itemView.tv_emoji.text = builder
+//                    }
+//
+//                    override fun onLoadFailed(e: Exception?, errorDrawable: Drawable?) {
+//                        super.onLoadFailed(e, errorDrawable)
+//                        val builder = SpannableStringBuilder()
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                            builder.append(" ", ImageSpan(itemView.context,
+//                                    BitmapFactory.decodeResource(itemView.resources, R.mipmap.ic_launcher_round)), 0)
+//                        }
+//                        itemView.tv_emoji.text = builder
+//                    }
+//                }
+//                Glide.with(itemView.context)
+//                        .load(emoji.url)
+//                        .asBitmap()
+//                        .skipMemoryCache(true)
+//                        .placeholder(R.mipmap.ic_launcher_round)
+//                        .error(R.mipmap.ic_launcher_round)
+//                        .format(DecodeFormat.PREFER_ARGB_8888)
+//                        .override(50, 50)
+//                        .fitCenter()
+//                        .into(target)
 
 //                var target1 = object : SimpleTarget<Bitmap>() {
 //                    override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
@@ -392,8 +405,7 @@ class MainActivity : AppCompatActivity() {
 //                        builder.append(" ", ImageSpan(itemView.context, bmp!!), 0)
 //                    }
 //                }
-
-//                itemView.tv_emoji_url.text = builder
+                itemView.tv_emoji.text = Html.fromHtml(emoji.url, GlideImageGetter(itemView.tv_emoji.context, itemView.tv_emoji), null)
             }
         }
     }

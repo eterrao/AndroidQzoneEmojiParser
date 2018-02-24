@@ -13,13 +13,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
+        <!--<TextView-->
+        <!--android:id="@+id/tv_html"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="text from html"-->
+        <!--android:visibility="gone" />-->
+
         <com.welove520.qzoneemojiparser.QQEmojiTextView
             android:id="@+id/qq_emoji_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="12345"
             android:textSize="14dp" />
-
     </ScrollView>
 
     <ImageView
@@ -53,4 +61,10 @@
         android:layout_below="@+id/sv_preview"
         android:visibility="gone" />
 
+    <ProgressBar
+        android:id="@+id/pb_loading"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 </RelativeLayout>

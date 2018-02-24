@@ -116,7 +116,7 @@ public class Rex {
     public static CharSequence transferUbb(String content) {
         String newContent = content;
         String emojiImg;
-        String reg = "\\[em\\]e(\\d{3,10})\\[\\/em\\]";
+        String reg = "\\[em\\]e(\\d{3,10})\\[\\\\*/em\\]";
         Pattern pattern = Pattern.compile(reg);
         Matcher result = pattern.matcher(content);
         //因为重构那边不能提供静态的gif，所以空间表情用png（数字小于200的就是空间表情），emoji用gif
@@ -133,7 +133,7 @@ public class Rex {
                 } else {
                     builder.append("a")
                             .setSpan(new ImageSpan(MyApplication.Companion.getContext(), bmp),
-                            builder.length() - 1, builder.length(), 0);
+                                    builder.length() - 1, builder.length(), 0);
                 }
             }
             builderTotal.append(builder);
@@ -173,4 +173,35 @@ public class Rex {
         return richText;
     }
 
+
+    /**
+     * eg:
+     * content:[em]e102[/em]
+     */
+    public static String transferUbbToImg(String content) {
+        String newContent = content;
+        String emojiImg;
+
+        String reg = "\\[em\\]e(\\d{3,10})\\[\\/em\\]";
+        Pattern pattern = Pattern.compile(reg);
+        Matcher result = pattern.matcher(content);
+        while (result.find()) {
+            emojiImg = "http://qzonestyle.gtimg.cn/qzone/em/e" + result.group(1) + "@2x.png";
+            String emojiUrl = "<img src='" + emojiImg + "'" + "height=\"42\" width=\"42\"" + "  />";
+            newContent = result.replaceAll(emojiUrl);
+        }
+        //因为重构那边不能提供静态的gif，所以空间表情用png（数字小于200的就是空间表情），emoji用gif
+//        while (result.find()) {
+//            String imgType;
+//            int index = Integer.parseInt(result.group(1));
+//            imgType = (index < 200 ? "@2x.png" : "@2x.gif");
+////            emojiImg = "<img class='i-emoji-m' src='http://qzonestyle.gtimg.cn/qzone/em/e" + result.group(1) + imgType + "' alt='表情' >";
+//            emojiImg = "http://qzonestyle.gtimg.cn/qzone/em/e" + result.group(1) + "@2x.png";
+//            String emojiUrl = "<img src='" + emojiImg + "'" + "height=\"42\" width=\"42\"" + "  />";
+//            newContent = result.replaceAll(emojiUrl)
+////            newContent = newContent.replace(result.group(0), emojiUrl);
+//        }
+        Log.e("TAG", newContent);
+        return newContent;
+    }
 }

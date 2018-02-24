@@ -42,21 +42,24 @@ final class QzoneEmojiSpan extends DynamicDrawableSpan {
     public int getSize(final Paint paint, final CharSequence text, final int start,
                        final int end, final Paint.FontMetricsInt fontMetricsInt) {
         Drawable drawable = getDrawable();
-        Rect rect = drawable.getBounds();
-        if (fontMetricsInt != null) {
-            Paint.FontMetricsInt fmPaint = paint.getFontMetricsInt();
-            int fontHeight = fmPaint.bottom - fmPaint.top;
-            int drHeight = rect.bottom - rect.top;
+        if (drawable != null) {
+            Rect rect = drawable.getBounds();
+            if (fontMetricsInt != null) {
+                Paint.FontMetricsInt fmPaint = paint.getFontMetricsInt();
+                int fontHeight = fmPaint.bottom - fmPaint.top;
+                int drHeight = rect.bottom - rect.top;
 
-            int top = drHeight / 2 - fontHeight / 4;
-            int bottom = drHeight / 2 + fontHeight / 4;
+                int top = drHeight / 2 - fontHeight / 4;
+                int bottom = drHeight / 2 + fontHeight / 4;
 
-            fontMetricsInt.ascent = -bottom;
-            fontMetricsInt.top = -bottom;
-            fontMetricsInt.bottom = top;
-            fontMetricsInt.descent = top;
+                fontMetricsInt.ascent = -bottom;
+                fontMetricsInt.top = -bottom;
+                fontMetricsInt.bottom = top;
+                fontMetricsInt.descent = top;
+            }
+            return rect.right;
         }
-        return rect.right;
+        return 0;
     }
 
 
